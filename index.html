@@ -805,73 +805,8 @@ footer{
   </button>
 </nav>
 
-<script>
-let currentLanguage = "ta";
-
-function showPage(pageId,button){
-  document.querySelectorAll(".page").forEach(page=>{
-    page.classList.remove("active");
-  });
-
-  document.querySelectorAll(".nav-btn").forEach(btn=>{
-    btn.classList.remove("active");
-  });
-
-  document.getElementById(pageId).classList.add("active");
-
-  if(button){
-    button.classList.add("active");
-  }
-
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-
-function toggleLanguage(){
-  currentLanguage = currentLanguage === "ta" ? "en" : "ta";
-
-  document.querySelectorAll("[data-ta][data-en]").forEach(element=>{
-    element.textContent = currentLanguage === "ta"
-      ? element.dataset.ta
-      : element.dataset.en;
-  });
-
-  document.getElementById("langButton").textContent =
-    currentLanguage === "ta" ? "தமிழ்" : "English";
-}
-
-function money(value){
-  return "₹" + (Number(value) || 0).toLocaleString("en-IN",{
-    minimumFractionDigits:2,
-    maximumFractionDigits:2
-  });
-}
-
-function calculateGoatPurchase(){
-  const weight = Number(document.getElementById("goatWeight").value) || 0;
-  const rate = Number(document.getElementById("goatRate").value) || 0;
-  const other = Number(document.getElementById("goatOtherCost").value) || 0;
-
-  document.getElementById("goatTotal").textContent =
-    money(weight * rate + other);
-}
-
-function calculateMeatPurchase(){
-  const weight = Number(document.getElementById("meatWeight").value) || 0;
-  const rate = Number(document.getElementById("meatRate").value) || 0;
-  const other = Number(document.getElementById("meatOtherCost").value) || 0;
-
-  document.getElementById("meatTotal").textContent =
-    money(weight * rate + other);
-}
-
-function calculateBill(){
-  const weight = Number(document.getElementById("billWeight").value) || 0;
-  const rate = Number(document.getElementById("billRate").value) || 0;
-
-  document.getElementById("billTotal").textContent =
-    money(weight * rate);
-}
-</script>
+<!-- LOAD EXTERNAL JAVASCRIPT -->
+<script src="app.js"></script>
 
 </body>
 </html>
