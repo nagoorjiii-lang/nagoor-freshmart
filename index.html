@@ -1,0 +1,877 @@
+
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nagoor Mutton Stall | NEXORA Technologies</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --primary:#174b3a;
+  --primary-dark:#10372b;
+  --primary-light:#e5f0eb;
+  --gold:#c18a3c;
+  --gold-light:#fbf2e3;
+  --bg:#f5f4ef;
+  --card:#ffffff;
+  --text:#202b26;
+  --muted:#78837d;
+  --line:#e3e8e3;
+  --danger:#a83d3d;
+  --radius:18px;
+  --shadow:0 5px 20px rgba(20,55,40,.06);
+}
+
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Nunito','Noto Sans Tamil',sans-serif;
+  font-size:16px;
+  line-height:1.5;
+  padding-bottom:110px;
+}
+
+body,button,input,select,textarea{
+  font-family:'Nunito','Noto Sans Tamil',sans-serif;
+}
+
+header{
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  color:white;
+  padding:20px 18px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  box-shadow:0 5px 20px rgba(16,55,43,.18);
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:13px;
+  min-width:0;
+}
+
+.logo{
+  width:54px;
+  height:54px;
+  border-radius:17px;
+  display:grid;
+  place-items:center;
+  background:#ffffff20;
+  font-size:32px;
+  flex:none;
+}
+
+.brand h1{
+  margin:0;
+  font-size:20px;
+  font-weight:900;
+  line-height:1.2;
+}
+
+.brand p{
+  margin:4px 0 0;
+  font-size:12px;
+  color:#d7e7df;
+}
+
+.lang{
+  border:2px solid #ffffff80;
+  background:#ffffff12;
+  color:white;
+  border-radius:30px;
+  padding:11px 16px;
+  font-size:14px;
+  font-weight:800;
+  cursor:pointer;
+  flex:none;
+}
+
+main{
+  max-width:1000px;
+  margin:auto;
+  padding:18px;
+}
+
+.page{
+  display:none;
+}
+
+.page.active{
+  display:block;
+  animation:fade .2s ease;
+}
+
+@keyframes fade{
+  from{opacity:.5;transform:translateY(5px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.title{
+  margin:5px 0 5px;
+  color:var(--primary-dark);
+  font-size:24px;
+  font-weight:900;
+}
+
+.hint{
+  color:var(--muted);
+  font-size:14px;
+  margin:0 0 18px;
+}
+
+.panel{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:19px;
+  margin-bottom:16px;
+  box-shadow:var(--shadow);
+}
+
+.panel h3{
+  color:var(--primary);
+  font-size:17px;
+  font-weight:900;
+  margin:0 0 15px;
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:13px;
+  margin:17px 0;
+}
+
+.stat{
+  background:white;
+  border:1px solid var(--line);
+  border-radius:17px;
+  padding:17px;
+  box-shadow:var(--shadow);
+  min-width:0;
+}
+
+.stat small{
+  display:block;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:700;
+  margin-bottom:7px;
+}
+
+.stat b{
+  display:block;
+  color:var(--primary);
+  font-size:23px;
+  font-weight:900;
+  overflow-wrap:anywhere;
+}
+
+.stat .icon{
+  font-size:22px;
+  margin-bottom:8px;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:13px;
+}
+
+.field{
+  margin-bottom:14px;
+  min-width:0;
+}
+
+.field.full{
+  grid-column:1/-1;
+}
+
+label{
+  display:block;
+  color:#46544c;
+  font-size:14px;
+  font-weight:800;
+  margin-bottom:7px;
+}
+
+input,select,textarea{
+  width:100%;
+  min-height:49px;
+  padding:12px 13px;
+  border:1.5px solid #dce4de;
+  border-radius:12px;
+  background:#fff;
+  color:var(--text);
+  font-size:15px;
+  outline:none;
+}
+
+input:focus,select:focus,textarea:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px #174b3a14;
+}
+
+textarea{
+  min-height:90px;
+  resize:vertical;
+}
+
+.btn{
+  min-height:49px;
+  padding:12px 19px;
+  border:0;
+  border-radius:12px;
+  background:var(--primary);
+  color:white;
+  font-size:15px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.btn:active{
+  transform:scale(.98);
+}
+
+.btn.gold{
+  background:var(--gold);
+  color:#fff;
+}
+
+.btn.light{
+  background:var(--primary-light);
+  color:var(--primary);
+}
+
+.btn.danger{
+  background:var(--danger);
+}
+
+.btn-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:8px;
+}
+
+.table-wrap{
+  width:100%;
+  overflow-x:auto;
+  border:1px solid var(--line);
+  border-radius:13px;
+}
+
+table{
+  width:100%;
+  min-width:560px;
+  border-collapse:collapse;
+  background:white;
+}
+
+th,td{
+  padding:13px;
+  border-bottom:1px solid var(--line);
+  text-align:left;
+  font-size:14px;
+}
+
+th{
+  background:var(--primary-light);
+  color:var(--primary-dark);
+  font-weight:900;
+}
+
+td{
+  color:#435047;
+}
+
+.empty{
+  padding:25px;
+  text-align:center;
+  color:var(--muted);
+  font-size:14px;
+}
+
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  z-index:100;
+  background:white;
+  border-top:1px solid var(--line);
+  box-shadow:0 -5px 20px #173d2b12;
+  display:flex;
+  justify-content:flex-start;
+  gap:7px;
+  padding:10px 10px calc(10px + env(safe-area-inset-bottom));
+  overflow-x:auto;
+  scrollbar-width:thin;
+}
+
+.nav-btn{
+  flex:0 0 auto;
+  min-width:91px;
+  min-height:67px;
+  border:0;
+  border-radius:14px;
+  background:transparent;
+  color:#68766e;
+  font-size:12px;
+  font-weight:900;
+  padding:8px 10px;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:3px;
+}
+
+.nav-btn span{
+  font-size:23px;
+  line-height:1.2;
+}
+
+.nav-btn.active{
+  background:var(--primary);
+  color:white;
+}
+
+.badge{
+  display:inline-block;
+  padding:5px 10px;
+  border-radius:20px;
+  background:var(--gold-light);
+  color:#895b1e;
+  font-size:12px;
+  font-weight:900;
+}
+
+.total-box{
+  background:var(--primary-light);
+  border:1px solid #c9dfd2;
+  border-radius:13px;
+  padding:15px;
+  margin:14px 0;
+}
+
+.total-box small{
+  color:var(--primary);
+  font-weight:800;
+}
+
+.total-box b{
+  display:block;
+  font-size:25px;
+  color:var(--primary-dark);
+}
+
+footer{
+  text-align:center;
+  color:var(--muted);
+  font-size:12px;
+  padding:15px;
+}
+
+@media(min-width:700px){
+  .stats{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+  main{
+    padding:25px;
+  }
+  .bottom-nav{
+    justify-content:center;
+  }
+}
+
+@media(max-width:480px){
+  header{
+    padding:15px 12px;
+  }
+  .brand h1{
+    font-size:17px;
+  }
+  .brand p{
+    font-size:10px;
+  }
+  .logo{
+    width:46px;
+    height:46px;
+    font-size:27px;
+  }
+  .lang{
+    padding:9px 11px;
+    font-size:12px;
+  }
+  main{
+    padding:13px;
+  }
+  .form-grid{
+    grid-template-columns:1fr;
+  }
+  .field.full{
+    grid-column:auto;
+  }
+  .title{
+    font-size:21px;
+  }
+  .stat{
+    padding:13px;
+  }
+  .stat b{
+    font-size:20px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo">🐐</div>
+    <div>
+      <h1>NAGOOR MUTTON STALL</h1>
+      <p>Smart Shop Management System | NEXORA Technologies</p>
+    </div>
+  </div>
+  <button class="lang" onclick="toggleLanguage()" id="langButton">தமிழ்</button>
+</header>
+
+<main>
+
+<!-- DASHBOARD -->
+<section class="page active" id="dashboard">
+  <h2 class="title" data-ta="முகப்பு" data-en="Dashboard">முகப்பு</h2>
+  <p class="hint" data-ta="இன்றைய கடை நிலவரம்" data-en="Today's shop overview">இன்றைய கடை நிலவரம்</p>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="icon">💰</div>
+      <small data-ta="இன்றைய விற்பனை" data-en="Today's Sales">இன்றைய விற்பனை</small>
+      <b id="todaySales">₹0.00</b>
+    </div>
+    <div class="stat">
+      <div class="icon">🥩</div>
+      <small data-ta="கையிருப்பு" data-en="Available Stock">கையிருப்பு</small>
+      <b id="availableStock">0 kg</b>
+    </div>
+    <div class="stat">
+      <div class="icon">🐐</div>
+      <small data-ta="இன்றைய கொள்முதல்" data-en="Today's Purchase">இன்றைய கொள்முதல்</small>
+      <b id="todayPurchase">₹0.00</b>
+    </div>
+    <div class="stat">
+      <div class="icon">📒</div>
+      <small data-ta="கடன் தொகை" data-en="Credit / Udhar">கடன் தொகை</small>
+      <b id="creditAmount">₹0.00</b>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3 data-ta="சமீபத்திய செயல்பாடுகள்" data-en="Recent Activity">சமீபத்திய செயல்பாடுகள்</h3>
+    <div class="empty" data-ta="இன்னும் பதிவுகள் இல்லை" data-en="No records available yet">இன்னும் பதிவுகள் இல்லை</div>
+  </div>
+</section>
+
+<!-- GOAT PURCHASE -->
+<section class="page" id="goatPurchase">
+  <h2 class="title" data-ta="ஆடு கொள்முதல்" data-en="Goat Purchase">ஆடு கொள்முதல்</h2>
+  <p class="hint" data-ta="உயிர் எடை அடிப்படையில் ஆடு வாங்குதல்" data-en="Purchase goats by live weight">உயிர் எடை அடிப்படையில் ஆடு வாங்குதல்</p>
+
+  <div class="panel">
+    <h3 data-ta="புதிய கொள்முதல் பதிவு" data-en="New Purchase Entry">புதிய கொள்முதல் பதிவு</h3>
+    <div class="form-grid">
+      <div class="field">
+        <label data-ta="விற்பனையாளர் பெயர்" data-en="Supplier Name">விற்பனையாளர் பெயர்</label>
+        <input id="goatSupplier" placeholder="Supplier name">
+      </div>
+      <div class="field">
+        <label data-ta="கொள்முதல் வகை" data-en="Purchase Type">கொள்முதல் வகை</label>
+        <select id="goatType">
+          <option value="individual">Individual Goat Weight</option>
+          <option value="combined">Combined Batch Weight</option>
+        </select>
+      </div>
+      <div class="field">
+        <label data-ta="ஆடுகளின் எண்ணிக்கை" data-en="Number of Goats">ஆடுகளின் எண்ணிக்கை</label>
+        <input id="goatCount" type="number" min="1" placeholder="0">
+      </div>
+      <div class="field">
+        <label data-ta="மொத்த உயிர் எடை (kg)" data-en="Total Live Weight (kg)">மொத்த உயிர் எடை (kg)</label>
+        <input id="goatWeight" type="number" min="0" step="0.001" placeholder="0.000">
+      </div>
+      <div class="field">
+        <label data-ta="ஒரு கிலோ விலை (₹)" data-en="Rate per kg (₹)">ஒரு கிலோ விலை (₹)</label>
+        <input id="goatRate" type="number" min="0" step="0.01" placeholder="0.00">
+      </div>
+      <div class="field">
+        <label data-ta="கூடுதல் செலவு (₹)" data-en="Other Costs (₹)">கூடுதல் செலவு (₹)</label>
+        <input id="goatOtherCost" type="number" min="0" step="0.01" placeholder="0.00">
+      </div>
+    </div>
+    <div class="total-box">
+      <small data-ta="மொத்த கொள்முதல் தொகை" data-en="Purchase Total">மொத்த கொள்முதல் தொகை</small>
+      <b id="goatTotal">₹0.00</b>
+    </div>
+    <button class="btn" type="button" onclick="calculateGoatPurchase()" data-ta="தொகை கணக்கிடு" data-en="Calculate Total">தொகை கணக்கிடு</button>
+  </div>
+  <div class="panel">
+    <h3 data-ta="கொள்முதல் பதிவுகள்" data-en="Purchase Records">கொள்முதல் பதிவுகள்</h3>
+    <div class="empty">No records available</div>
+  </div>
+</section>
+
+<!-- MEAT PURCHASE -->
+<section class="page" id="meatPurchase">
+  <h2 class="title" data-ta="மாமிச கொள்முதல்" data-en="Meat Purchase">மாமிச கொள்முதல்</h2>
+  <p class="hint" data-ta="நேரடி கலப்பு இறைச்சி கொள்முதல்" data-en="Direct mixed meat purchase">நேரடி கலப்பு இறைச்சி கொள்முதல்</p>
+
+  <div class="panel">
+    <h3 data-ta="புதிய இறைச்சி கொள்முதல்" data-en="New Meat Purchase">புதிய இறைச்சி கொள்முதல்</h3>
+    <div class="form-grid">
+      <div class="field">
+        <label data-ta="விற்பனையாளர் பெயர்" data-en="Supplier Name">விற்பனையாளர் பெயர்</label>
+        <input id="meatSupplier" placeholder="Supplier name">
+      </div>
+      <div class="field">
+        <label data-ta="எடை (kg)" data-en="Weight (kg)">எடை (kg)</label>
+        <input id="meatWeight" type="number" min="0" step="0.001" placeholder="0.000">
+      </div>
+      <div class="field">
+        <label data-ta="ஒரு கிலோ விலை (₹)" data-en="Rate per kg (₹)">ஒரு கிலோ விலை (₹)</label>
+        <input id="meatRate" type="number" min="0" step="0.01" placeholder="0.00">
+      </div>
+      <div class="field">
+        <label data-ta="கூடுதல் செலவு (₹)" data-en="Other Costs (₹)">கூடுதல் செலவு (₹)</label>
+        <input id="meatOtherCost" type="number" min="0" step="0.01" placeholder="0.00">
+      </div>
+    </div>
+    <div class="total-box">
+      <small data-ta="மொத்த தொகை" data-en="Total Amount">மொத்த தொகை</small>
+      <b id="meatTotal">₹0.00</b>
+    </div>
+    <button class="btn" type="button" onclick="calculateMeatPurchase()" data-ta="தொகை கணக்கிடு" data-en="Calculate Total">தொகை கணக்கிடு</button>
+  </div>
+  <div class="panel">
+    <h3 data-ta="இறைச்சி கொள்முதல் பதிவுகள்" data-en="Meat Purchase Records">இறைச்சி கொள்முதல் பதிவுகள்</h3>
+    <div class="empty">No records available</div>
+  </div>
+</section>
+
+<!-- SLAUGHTER -->
+<section class="page" id="slaughter">
+  <h2 class="title" data-ta="வெட்டுதல் மற்றும் எடை" data-en="Slaughter & Yield">வெட்டுதல் மற்றும் எடை</h2>
+  <p class="hint" data-ta="ஆட்டு எடையிலிருந்து கிடைக்கும் இறைச்சி மற்றும் உப பொருட்கள்" data-en="Record carcass, edible parts and waste">ஆட்டு எடையிலிருந்து கிடைக்கும் இறைச்சி மற்றும் உப பொருட்கள்</p>
+
+  <div class="panel">
+    <h3 data-ta="வெட்டுதல் பதிவு" data-en="Slaughter Entry">வெட்டுதல் பதிவு</h3>
+    <div class="form-grid">
+      <div class="field">
+        <label>Batch ID</label>
+        <input id="batchId" placeholder="Batch ID">
+      </div>
+      <div class="field">
+        <label data-ta="வெட்டிய தேதி" data-en="Slaughter Date">வெட்டிய தேதி</label>
+        <input id="slaughterDate" type="date">
+      </div>
+      <div class="field">
+        <label data-ta="ஆடுகளின் எண்ணிக்கை" data-en="Number of Goats">ஆடுகளின் எண்ணிக்கை</label>
+        <input id="slaughterGoats" type="number" min="1">
+      </div>
+      <div class="field">
+        <label data-ta="சுத்தமான இறைச்சி எடை (kg)" data-en="Dressed Carcass Weight (kg)">சுத்தமான இறைச்சி எடை (kg)</label>
+        <input id="carcassWeight" type="number" min="0" step="0.001">
+      </div>
+      <div class="field">
+        <label data-ta="உண்ணக்கூடிய உள் உறுப்புகள் (kg)" data-en="Edible Parts Weight (kg)">உண்ணக்கூடிய உள் உறுப்புகள் (kg)</label>
+        <input id="edibleWeight" type="number" min="0" step="0.001">
+      </div>
+      <div class="field">
+        <label data-ta="கழிவு / இழப்பு (kg)" data-en="Waste / Loss (kg)">கழிவு / இழப்பு (kg)</label>
+        <input id="wasteWeight" type="number" min="0" step="0.001">
+      </div>
+    </div>
+    <button class="btn" type="button" data-ta="பதிவு செய்ய" data-en="Save Record">பதிவு செய்ய</button>
+  </div>
+  <div class="panel">
+    <h3 data-ta="வெட்டுதல் பதிவுகள்" data-en="Slaughter Records">வெட்டுதல் பதிவுகள்</h3>
+    <div class="empty">No records available</div>
+  </div>
+</section>
+
+<!-- INVENTORY -->
+<section class="page" id="inventory">
+  <h2 class="title" data-ta="சரக்கு இருப்பு" data-en="Inventory">சரக்கு இருப்பு</h2>
+  <p class="hint" data-ta="கிடைக்கும் இறைச்சி மற்றும் உப பொருட்களை நிர்வகிக்கவும்" data-en="Manage available meat and edible products">கிடைக்கும் இறைச்சி மற்றும் உப பொருட்களை நிர்வகிக்கவும்</p>
+
+  <div class="panel">
+    <h3 data-ta="புதிய சரக்கு சேர்க்க" data-en="Add New Stock">புதிய சரக்கு சேர்க்க</h3>
+    <div class="form-grid">
+      <div class="field">
+        <label data-ta="பொருள் பெயர்" data-en="Product Name">பொருள் பெயர்</label>
+        <select id="stockProduct">
+          <option>Bone-in Mutton</option>
+          <option>Boneless</option>
+          <option>Liver</option>
+          <option>Heart</option>
+          <option>Kidney</option>
+          <option>Brain</option>
+          <option>Head</option>
+          <option>Paya / Legs</option>
+          <option>Intestine</option>
+          <option>Other Edible Parts</option>
+        </select>
+      </div>
+      <div class="field">
+        <label data-ta="சரக்கு மூலம்" data-en="Stock Source">சரக்கு மூலம்</label>
+        <select id="stockSource">
+          <option>Own Goat</option>
+          <option>Direct Mixed Meat</option>
+        </select>
+      </div>
+      <div class="field">
+        <label data-ta="எடை (kg)" data-en="Weight (kg)">எடை (kg)</label>
+        <input id="stockWeight" type="number" min="0" step="0.001">
+      </div>
+      <div class="field">
+        <label data-ta="விற்பனை விலை / kg (₹)" data-en="Selling Rate / kg (₹)">விற்பனை விலை / kg (₹)</label>
+        <input id="stockRate" type="number" min="0" step="0.01">
+      </div>
+    </div>
+    <button class="btn" type="button" data-ta="சரக்கு சேர்க்க" data-en="Add Stock">சரக்கு சேர்க்க</button>
+  </div>
+
+  <div class="panel">
+    <h3 data-ta="கிடைக்கும் சரக்கு" data-en="Available Products">கிடைக்கும் சரக்கு</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Source</th>
+            <th>Weight</th>
+            <th>Rate / kg</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="4" class="empty">No stock available</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- BILLING -->
+<section class="page" id="billing">
+  <h2 class="title" data-ta="விற்பனை மற்றும் பில்" data-en="Billing">விற்பனை மற்றும் பில்</h2>
+  <p class="hint" data-ta="வாடிக்கையாளர் விற்பனை பதிவு செய்யவும்" data-en="Create customer sales bills">வாடிக்கையாளர் விற்பனை பதிவு செய்யவும்</p>
+
+  <div class="panel">
+    <h3 data-ta="புதிய பில்" data-en="New Bill">புதிய பில்</h3>
+    <div class="form-grid">
+      <div class="field full">
+        <label data-ta="வாடிக்கையாளர் பெயர்" data-en="Customer Name">வாடிக்கையாளர் பெயர்</label>
+        <input id="customerName" placeholder="Customer name">
+      </div>
+      <div class="field">
+        <label data-ta="பொருள்" data-en="Product">பொருள்</label>
+        <select id="billProduct">
+          <option value="">Select product</option>
+          <option>Bone-in Mutton</option>
+          <option>Boneless</option>
+          <option>Liver</option>
+          <option>Heart</option>
+          <option>Kidney</option>
+          <option>Brain</option>
+          <option>Head</option>
+          <option>Paya / Legs</option>
+          <option>Intestine</option>
+          <option>Other Edible Parts</option>
+        </select>
+      </div>
+      <div class="field">
+        <label data-ta="எடை (kg)" data-en="Weight (kg)">எடை (kg)</label>
+        <input id="billWeight" type="number" min="0" step="0.001">
+      </div>
+      <div class="field">
+        <label data-ta="விலை / kg (₹)" data-en="Rate / kg (₹)">விலை / kg (₹)</label>
+        <input id="billRate" type="number" min="0" step="0.01">
+      </div>
+      <div class="field">
+        <label data-ta="பணம் செலுத்தும் முறை" data-en="Payment Method">பணம் செலுத்தும் முறை</label>
+        <select id="paymentMethod">
+          <option value="Cash">Cash</option>
+          <option value="UPI">UPI</option>
+          <option value="Credit">Credit / Udhar</option>
+        </select>
+      </div>
+    </div>
+    <div class="total-box">
+      <small data-ta="மொத்த பில் தொகை" data-en="Bill Total">மொத்த பில் தொகை</small>
+      <b id="billTotal">₹0.00</b>
+    </div>
+    <button class="btn" type="button" onclick="calculateBill()" data-ta="தொகை கணக்கிடு" data-en="Calculate Bill">தொகை கணக்கிடு</button>
+    <div class="btn-row">
+      <button class="btn gold" type="button" data-ta="பில் உருவாக்கு" data-en="Generate Bill">பில் உருவாக்கு</button>
+      <button class="btn light" type="button" onclick="window.print()" data-ta="பிரிண்ட்" data-en="Print">பிரிண்ட்</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3 data-ta="விற்பனை வரலாறு" data-en="Billing History">விற்பனை வரலாறு</h3>
+    <div class="empty">No bills available</div>
+  </div>
+</section>
+
+<!-- REPORTS -->
+<section class="page" id="reports">
+  <h2 class="title" data-ta="அறிக்கைகள்" data-en="Reports">அறிக்கைகள்</h2>
+  <p class="hint" data-ta="கடை விற்பனை மற்றும் கொள்முதல் அறிக்கைகள்" data-en="Shop sales and purchase reports">கடை விற்பனை மற்றும் கொள்முதல் அறிக்கைகள்</p>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="icon">💵</div>
+      <small data-ta="மொத்த விற்பனை" data-en="Total Sales">மொத்த விற்பனை</small>
+      <b id="reportSales">₹0.00</b>
+    </div>
+    <div class="stat">
+      <div class="icon">🧾</div>
+      <small data-ta="மொத்த கொள்முதல்" data-en="Total Purchase">மொத்த கொள்முதல்</small>
+      <b id="reportPurchase">₹0.00</b>
+    </div>
+    <div class="stat">
+      <div class="icon">📒</div>
+      <small data-ta="கடன் விற்பனை" data-en="Credit Sales">கடன் விற்பனை</small>
+      <b id="reportCredit">₹0.00</b>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3 data-ta="பரிவர்த்தனை விவரங்கள்" data-en="Transactions">பரிவர்த்தனை விவரங்கள்</h3>
+    <div class="empty">No transactions available</div>
+  </div>
+</section>
+
+<footer>
+  NAGOOR MUTTON STALL<br>
+  Powered by NEXORA Technologies
+</footer>
+
+</main>
+
+<!-- NAVIGATION -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" onclick="showPage('dashboard',this)">
+    <span>🏠</span><span data-ta="முகப்பு" data-en="Home">முகப்பு</span>
+  </button>
+  <button class="nav-btn" onclick="showPage('goatPurchase',this)">
+    <span>🐐</span><span data-ta="ஆடு வாங்குதல்" data-en="Goat">ஆடு வாங்குதல்</span>
+  </button>
+  <button class="nav-btn" onclick="showPage('meatPurchase',this)">
+    <span>🥩</span><span data-ta="இறைச்சி" data-en="Meat">இறைச்சி</span>
+  </button>
+  <button class="nav-btn" onclick="showPage('slaughter',this)">
+    <span>⚖️</span><span data-ta="வெட்டுதல்" data-en="Yield">வெட்டுதல்</span>
+  </button>
+  <button class="nav-btn" onclick="showPage('inventory',this)">
+    <span>📦</span><span data-ta="சரக்கு" data-en="Stock">சரக்கு</span>
+  </button>
+  <button class="nav-btn" onclick="showPage('billing',this)">
+    <span>🧾</span><span data-ta="பில்லிங்" data-en="Billing">பில்லிங்</span>
+  </button>
+  <button class="nav-btn" onclick="showPage('reports',this)">
+    <span>📊</span><span data-ta="அறிக்கை" data-en="Reports">அறிக்கை</span>
+  </button>
+</nav>
+
+<script>
+let currentLanguage = "ta";
+
+function showPage(pageId,button){
+  document.querySelectorAll(".page").forEach(page=>{
+    page.classList.remove("active");
+  });
+
+  document.querySelectorAll(".nav-btn").forEach(btn=>{
+    btn.classList.remove("active");
+  });
+
+  document.getElementById(pageId).classList.add("active");
+
+  if(button){
+    button.classList.add("active");
+  }
+
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function toggleLanguage(){
+  currentLanguage = currentLanguage === "ta" ? "en" : "ta";
+
+  document.querySelectorAll("[data-ta][data-en]").forEach(element=>{
+    element.textContent = currentLanguage === "ta"
+      ? element.dataset.ta
+      : element.dataset.en;
+  });
+
+  document.getElementById("langButton").textContent =
+    currentLanguage === "ta" ? "தமிழ்" : "English";
+}
+
+function money(value){
+  return "₹" + (Number(value) || 0).toLocaleString("en-IN",{
+    minimumFractionDigits:2,
+    maximumFractionDigits:2
+  });
+}
+
+function calculateGoatPurchase(){
+  const weight = Number(document.getElementById("goatWeight").value) || 0;
+  const rate = Number(document.getElementById("goatRate").value) || 0;
+  const other = Number(document.getElementById("goatOtherCost").value) || 0;
+
+  document.getElementById("goatTotal").textContent =
+    money(weight * rate + other);
+}
+
+function calculateMeatPurchase(){
+  const weight = Number(document.getElementById("meatWeight").value) || 0;
+  const rate = Number(document.getElementById("meatRate").value) || 0;
+  const other = Number(document.getElementById("meatOtherCost").value) || 0;
+
+  document.getElementById("meatTotal").textContent =
+    money(weight * rate + other);
+}
+
+function calculateBill(){
+  const weight = Number(document.getElementById("billWeight").value) || 0;
+  const rate = Number(document.getElementById("billRate").value) || 0;
+
+  document.getElementById("billTotal").textContent =
+    money(weight * rate);
+}
+</script>
+
+</body>
+</html>
