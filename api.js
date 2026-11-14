@@ -1,117 +1,122 @@
 
-/* =========================================
-   NAGOOR FRESHMART
-   API CONNECTION LAYER
-   NEXORA Technologies
-========================================= */
-
 const NagoorAPI = {
-
-  // Cloudflare Worker URL ready aanadhum inga add pannuvom.
   BASE_URL: "",
 
-  async request(endpoint, options = {}) {
+  setBaseUrl(url) {
+    this.BASE_URL = String(url || "").trim().replace(/\/+$/, "");
+  },
 
+  async request(path, options = {}) {
     if (!this.BASE_URL) {
-      throw new Error("API URL not configured yet.");
+      throw new Error("API URL is not configured yet.");
     }
 
-    const response = await fetch(
-      this.BASE_URL.replace(/\/+$/, "") + endpoint,
-      {
-        method: options.method || "GET",
+    const response = await fetch(`${this.BASE_URL}${path}`, {
+      method: options.method || "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {})
+      },
+      body: options.body
+    });
 
-        headers: {
-          "Content-Type": "application/json",
-          ...options.headers
-        },
+    const contentType = response.headers.get("content-type") || "";
+    const data = contentType.includes("application/json")
+      ? await response.json()
+      : await response.text();
 
-        body: options.body
-          ? JSON.stringify(options.body)
-          : undefined
-      }
-    );
+    if (!response.ok) {
+      const message =
+        typeof data === "object" && data !== null
+          ? data.error || data.message
+          : data;
 
-    let result;
-
-    try {
-      result = await response.json();
-    } catch {
-      throw new Error("Invalid server response.");
+      throw new Error(message || `Request failed (${response.status})`);
     }
 
-    if (!response.ok || result.success === false) {
-      throw new Error(
-        result.message || "Server request failed."
-      );
-    }
-
-    return result;
+    return data;
   },
 
   health() {
-    return this.request("/api/health");
+    return this.request("/health");
   },
 
   dashboard() {
-    return this.request("/api/dashboard");
+    return this.request("/dashboard");
   },
 
   products() {
-    return this.request("/api/products");
+    return this.request("/products");
   },
 
   suppliers() {
-    return this.request("/api/suppliers");
+    return this.request("/suppliers");
   },
 
   customers() {
-    return this.request("/api/customers");
+    return this.request("/customers");
   },
 
   inventory() {
-    return this.request("/api/inventory");
+    return this.request("/inventory");
   },
 
   reports() {
-    return this.request("/api/reports");
+    return this.request("/reports");
+  },
+
+  goatLots() {
+    return this.request("/goat-lots");
   },
 
   saveGoatPurchase(data) {
-    return this.request("/api/goat-purchases", {
+    return this.request("/goat-purchases", {
       method: "POST",
-      body: data
+      body: JSON.stringify(data)
     });
   },
 
   saveMeatPurchase(data) {
-    return this.request("/api/meat-purchases", {
+    return this.request("/meat-purchases", {
       method: "POST",
-      body: data
+      body: JSON.stringify(data)
     });
   },
 
   saveSlaughter(data) {
-    return this.request("/api/slaughter", {
+    return this.request("/slaughter", {
       method: "POST",
-      body: data
+      body: JSON.stringify(data)
     });
   },
 
   saveSale(data) {
-    return this.request("/api/sales", {
+    return this.request("/sales", {
       method: "POST",
-      body: data
+      body: JSON.stringify(data)
     });
   },
 
   addStock(data) {
-    return this.request("/api/inventory", {
+    return this.request("/inventory", {
       method: "POST",
-      body: data
+      body: JSON.stringify(data)
+    });
+  },
+
+  collectPayment(data) {
+    return this.request("/payments", {
+      method: "POST",
+      body: JSON.stringify(data)
+    });
+  },
+
+  saveExpense(data) {
+    return this.request("/expenses", {
+      method: "POST",
+      body: JSON.stringify(data)
     });
   }
-
 };
 
 window.NagoorAPI = NagoorAPI;
