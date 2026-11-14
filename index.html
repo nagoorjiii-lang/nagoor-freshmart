@@ -27,14 +27,8 @@
   --shadow:0 5px 20px rgba(20,55,40,.06);
 }
 
-*{
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
-}
-
-html{
-  scroll-behavior:smooth;
-}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
 
 body{
   margin:0;
@@ -61,386 +55,145 @@ header{
   box-shadow:0 5px 20px rgba(16,55,43,.18);
 }
 
-.brand{
-  display:flex;
-  align-items:center;
-  gap:13px;
-  min-width:0;
-}
-
+.brand{display:flex;align-items:center;gap:13px;min-width:0}
 .logo{
-  width:54px;
-  height:54px;
-  border-radius:17px;
-  display:grid;
-  place-items:center;
-  background:#ffffff20;
-  font-size:32px;
-  flex:none;
+  width:54px;height:54px;border-radius:17px;
+  display:grid;place-items:center;background:#ffffff20;
+  font-size:32px;flex:none;
 }
-
-.brand h1{
-  margin:0;
-  font-size:20px;
-  font-weight:900;
-  line-height:1.2;
-}
-
-.brand p{
-  margin:4px 0 0;
-  font-size:12px;
-  color:#d7e7df;
-}
-
+.brand h1{margin:0;font-size:20px;font-weight:900;line-height:1.2}
+.brand p{margin:4px 0 0;font-size:12px;color:#d7e7df}
 .lang{
-  border:2px solid #ffffff80;
-  background:#ffffff12;
-  color:white;
-  border-radius:30px;
-  padding:11px 16px;
-  font-size:14px;
-  font-weight:800;
-  cursor:pointer;
-  flex:none;
+  border:2px solid #ffffff80;background:#ffffff12;color:white;
+  border-radius:30px;padding:11px 16px;font-size:14px;
+  font-weight:800;cursor:pointer;flex:none;
 }
 
-main{
-  max-width:1000px;
-  margin:auto;
-  padding:18px;
-}
-
-.page{
-  display:none;
-}
-
-.page.active{
-  display:block;
-  animation:fade .2s ease;
-}
+main{max-width:1000px;margin:auto;padding:18px}
+.page{display:none}
+.page.active{display:block;animation:fade .2s ease}
 
 @keyframes fade{
   from{opacity:.5;transform:translateY(5px)}
   to{opacity:1;transform:translateY(0)}
 }
 
-.title{
-  margin:5px 0 5px;
-  color:var(--primary-dark);
-  font-size:24px;
-  font-weight:900;
-}
-
-.hint{
-  color:var(--muted);
-  font-size:14px;
-  margin:0 0 18px;
-}
+.title{margin:5px 0 5px;color:var(--primary-dark);font-size:24px;font-weight:900}
+.hint{color:var(--muted);font-size:14px;margin:0 0 18px}
 
 .panel{
-  background:var(--card);
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  padding:19px;
-  margin-bottom:16px;
+  background:var(--card);border:1px solid var(--line);
+  border-radius:var(--radius);padding:19px;margin-bottom:16px;
   box-shadow:var(--shadow);
 }
-
-.panel h3{
-  color:var(--primary);
-  font-size:17px;
-  font-weight:900;
-  margin:0 0 15px;
-}
+.panel h3{color:var(--primary);font-size:17px;font-weight:900;margin:0 0 15px}
 
 .stats{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:13px;
-  margin:17px 0;
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:13px;margin:17px 0;
 }
-
 .stat{
-  background:white;
-  border:1px solid var(--line);
-  border-radius:17px;
-  padding:17px;
-  box-shadow:var(--shadow);
-  min-width:0;
+  background:white;border:1px solid var(--line);border-radius:17px;
+  padding:17px;box-shadow:var(--shadow);min-width:0;
 }
-
-.stat small{
-  display:block;
-  color:var(--muted);
-  font-size:13px;
-  font-weight:700;
-  margin-bottom:7px;
-}
-
-.stat b{
-  display:block;
-  color:var(--primary);
-  font-size:23px;
-  font-weight:900;
-  overflow-wrap:anywhere;
-}
-
-.stat .icon{
-  font-size:22px;
-  margin-bottom:8px;
-}
+.stat small{display:block;color:var(--muted);font-size:13px;font-weight:700;margin-bottom:7px}
+.stat b{display:block;color:var(--primary);font-size:23px;font-weight:900;overflow-wrap:anywhere}
+.stat .icon{font-size:22px;margin-bottom:8px}
 
 .form-grid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:13px;
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;
 }
-
-.field{
-  margin-bottom:14px;
-  min-width:0;
-}
-
-.field.full{
-  grid-column:1/-1;
-}
-
-label{
-  display:block;
-  color:#46544c;
-  font-size:14px;
-  font-weight:800;
-  margin-bottom:7px;
-}
+.field{margin-bottom:14px;min-width:0}
+.field.full{grid-column:1/-1}
+label{display:block;color:#46544c;font-size:14px;font-weight:800;margin-bottom:7px}
 
 input,select,textarea{
-  width:100%;
-  min-height:49px;
-  padding:12px 13px;
-  border:1.5px solid #dce4de;
-  border-radius:12px;
-  background:#fff;
-  color:var(--text);
-  font-size:15px;
-  outline:none;
+  width:100%;min-height:49px;padding:12px 13px;
+  border:1.5px solid #dce4de;border-radius:12px;
+  background:#fff;color:var(--text);font-size:15px;outline:none;
 }
-
 input:focus,select:focus,textarea:focus{
-  border-color:var(--primary);
-  box-shadow:0 0 0 3px #174b3a14;
+  border-color:var(--primary);box-shadow:0 0 0 3px #174b3a14;
 }
-
-textarea{
-  min-height:90px;
-  resize:vertical;
-}
+textarea{min-height:90px;resize:vertical}
 
 .btn{
-  min-height:49px;
-  padding:12px 19px;
-  border:0;
-  border-radius:12px;
-  background:var(--primary);
-  color:white;
-  font-size:15px;
-  font-weight:900;
-  cursor:pointer;
+  min-height:49px;padding:12px 19px;border:0;border-radius:12px;
+  background:var(--primary);color:white;font-size:15px;
+  font-weight:900;cursor:pointer;
 }
+.btn:active{transform:scale(.98)}
+.btn.gold{background:var(--gold);color:#fff}
+.btn.light{background:var(--primary-light);color:var(--primary)}
+.btn.danger{background:var(--danger)}
+.btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
 
-.btn:active{
-  transform:scale(.98);
-}
+.table-wrap{width:100%;overflow-x:auto;border:1px solid var(--line);border-radius:13px}
+table{width:100%;min-width:560px;border-collapse:collapse;background:white}
+th,td{padding:13px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}
+th{background:var(--primary-light);color:var(--primary-dark);font-weight:900}
+td{color:#435047}
 
-.btn.gold{
-  background:var(--gold);
-  color:#fff;
-}
-
-.btn.light{
-  background:var(--primary-light);
-  color:var(--primary);
-}
-
-.btn.danger{
-  background:var(--danger);
-}
-
-.btn-row{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  margin-top:8px;
-}
-
-.table-wrap{
-  width:100%;
-  overflow-x:auto;
-  border:1px solid var(--line);
-  border-radius:13px;
-}
-
-table{
-  width:100%;
-  min-width:560px;
-  border-collapse:collapse;
-  background:white;
-}
-
-th,td{
-  padding:13px;
-  border-bottom:1px solid var(--line);
-  text-align:left;
-  font-size:14px;
-}
-
-th{
-  background:var(--primary-light);
-  color:var(--primary-dark);
-  font-weight:900;
-}
-
-td{
-  color:#435047;
-}
-
-.empty{
-  padding:25px;
-  text-align:center;
-  color:var(--muted);
-  font-size:14px;
-}
+.empty{padding:25px;text-align:center;color:var(--muted);font-size:14px}
 
 .bottom-nav{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  z-index:100;
-  background:white;
-  border-top:1px solid var(--line);
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:white;border-top:1px solid var(--line);
   box-shadow:0 -5px 20px #173d2b12;
-  display:flex;
-  justify-content:flex-start;
-  gap:7px;
+  display:flex;justify-content:flex-start;gap:7px;
   padding:10px 10px calc(10px + env(safe-area-inset-bottom));
-  overflow-x:auto;
-  scrollbar-width:thin;
+  overflow-x:auto;scrollbar-width:thin;
 }
-
 .nav-btn{
-  flex:0 0 auto;
-  min-width:91px;
-  min-height:67px;
-  border:0;
-  border-radius:14px;
-  background:transparent;
-  color:#68766e;
-  font-size:12px;
-  font-weight:900;
-  padding:8px 10px;
-  cursor:pointer;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  gap:3px;
+  flex:0 0 auto;min-width:91px;min-height:67px;
+  border:0;border-radius:14px;background:transparent;
+  color:#68766e;font-size:12px;font-weight:900;
+  padding:8px 10px;cursor:pointer;display:flex;
+  flex-direction:column;justify-content:center;align-items:center;gap:3px;
 }
-
-.nav-btn span{
-  font-size:23px;
-  line-height:1.2;
-}
-
-.nav-btn.active{
-  background:var(--primary);
-  color:white;
-}
+.nav-btn span{font-size:23px;line-height:1.2}
+.nav-btn.active{background:var(--primary);color:white}
 
 .badge{
-  display:inline-block;
-  padding:5px 10px;
-  border-radius:20px;
-  background:var(--gold-light);
-  color:#895b1e;
-  font-size:12px;
-  font-weight:900;
+  display:inline-block;padding:5px 10px;border-radius:20px;
+  background:var(--gold-light);color:#895b1e;font-size:12px;font-weight:900;
 }
-
 .total-box{
-  background:var(--primary-light);
-  border:1px solid #c9dfd2;
-  border-radius:13px;
-  padding:15px;
-  margin:14px 0;
+  background:var(--primary-light);border:1px solid #c9dfd2;
+  border-radius:13px;padding:15px;margin:14px 0;
 }
+.total-box small{color:var(--primary);font-weight:800}
+.total-box b{display:block;font-size:25px;color:var(--primary-dark)}
 
-.total-box small{
-  color:var(--primary);
-  font-weight:800;
+.weight-row{
+  display:grid;grid-template-columns:1fr auto;gap:10px;
+  align-items:center;margin-bottom:10px;
 }
-
-.total-box b{
-  display:block;
-  font-size:25px;
-  color:var(--primary-dark);
+.weight-row label{margin:0}
+.weight-row input{margin-top:5px}
+.weight-row .goat-number{
+  color:var(--primary);font-weight:900;font-size:14px;
+  min-width:65px;
 }
-
-footer{
-  text-align:center;
-  color:var(--muted);
-  font-size:12px;
-  padding:15px;
-}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:15px}
 
 @media(min-width:700px){
-  .stats{
-    grid-template-columns:repeat(3,minmax(0,1fr));
-  }
-  main{
-    padding:25px;
-  }
-  .bottom-nav{
-    justify-content:center;
-  }
+  .stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+  main{padding:25px}
+  .bottom-nav{justify-content:center}
 }
-
 @media(max-width:480px){
-  header{
-    padding:15px 12px;
-  }
-  .brand h1{
-    font-size:17px;
-  }
-  .brand p{
-    font-size:10px;
-  }
-  .logo{
-    width:46px;
-    height:46px;
-    font-size:27px;
-  }
-  .lang{
-    padding:9px 11px;
-    font-size:12px;
-  }
-  main{
-    padding:13px;
-  }
-  .form-grid{
-    grid-template-columns:1fr;
-  }
-  .field.full{
-    grid-column:auto;
-  }
-  .title{
-    font-size:21px;
-  }
-  .stat{
-    padding:13px;
-  }
-  .stat b{
-    font-size:20px;
-  }
+  header{padding:15px 12px}
+  .brand h1{font-size:17px}
+  .brand p{font-size:10px}
+  .logo{width:46px;height:46px;font-size:27px}
+  .lang{padding:9px 11px;font-size:12px}
+  main{padding:13px}
+  .form-grid{grid-template-columns:1fr}
+  .field.full{grid-column:auto}
+  .title{font-size:21px}
+  .stat{padding:13px}
+  .stat b{font-size:20px}
 }
 </style>
 </head>
@@ -501,11 +254,13 @@ footer{
 
   <div class="panel">
     <h3 data-ta="புதிய கொள்முதல் பதிவு" data-en="New Purchase Entry">புதிய கொள்முதல் பதிவு</h3>
+
     <div class="form-grid">
       <div class="field">
         <label data-ta="விற்பனையாளர் பெயர்" data-en="Supplier Name">விற்பனையாளர் பெயர்</label>
         <input id="goatSupplier" placeholder="Supplier name">
       </div>
+
       <div class="field">
         <label data-ta="கொள்முதல் வகை" data-en="Purchase Type">கொள்முதல் வகை</label>
         <select id="goatType">
@@ -513,14 +268,32 @@ footer{
           <option value="combined">Combined Batch Weight</option>
         </select>
       </div>
+
       <div class="field">
         <label data-ta="ஆடுகளின் எண்ணிக்கை" data-en="Number of Goats">ஆடுகளின் எண்ணிக்கை</label>
-        <input id="goatCount" type="number" min="1" placeholder="0">
+        <input id="goatCount" type="number" min="1" step="1" placeholder="Enter goat count">
       </div>
+    </div>
+
+    <div id="individualWeightSection">
+      <h3 data-ta="ஒவ்வொரு ஆட்டின் எடை" data-en="Individual Goat Weights">ஒவ்வொரு ஆட்டின் எடை</h3>
+      <p class="hint" data-ta="ஒவ்வொரு ஆட்டின் எடையையும் தனித்தனியாக உள்ளிடவும்." data-en="Enter each goat's weight separately.">ஒவ்வொரு ஆட்டின் எடையையும் தனித்தனியாக உள்ளிடவும்.</p>
+      <div id="goatIndividualWeights">
+        <div class="empty">Enter number of goats to create weight fields.</div>
+      </div>
+    </div>
+
+    <div id="combinedWeightSection" style="display:none;">
       <div class="field">
-        <label data-ta="மொத்த உயிர் எடை (kg)" data-en="Total Live Weight (kg)">மொத்த உயிர் எடை (kg)</label>
-        <input id="goatWeight" type="number" min="0" step="0.001" placeholder="0.000">
+        <label data-ta="மொத்த உயிர் எடை (kg)" data-en="Combined Live Weight (kg)">மொத்த உயிர் எடை (kg)</label>
+        <input id="goatCombinedWeight" type="number" min="0" step="0.001" placeholder="0.000">
       </div>
+      <p class="hint" data-ta="மொத்த எடை ஆடுகளின் எண்ணிக்கையால் பிரிக்கப்பட்டு தனித்தனி சராசரி எடைகளாக பதிவு செய்யப்படும்." data-en="Total weight will be divided by goat count to create individual average-weight lots.">
+        மொத்த எடை ஆடுகளின் எண்ணிக்கையால் பிரிக்கப்பட்டு தனித்தனி சராசரி எடைகளாக பதிவு செய்யப்படும்.
+      </p>
+    </div>
+
+    <div class="form-grid">
       <div class="field">
         <label data-ta="ஒரு கிலோ விலை (₹)" data-en="Rate per kg (₹)">ஒரு கிலோ விலை (₹)</label>
         <input id="goatRate" type="number" min="0" step="0.01" placeholder="0.00">
@@ -530,12 +303,19 @@ footer{
         <input id="goatOtherCost" type="number" min="0" step="0.01" placeholder="0.00">
       </div>
     </div>
+
+    <div class="total-box">
+      <small data-ta="மொத்த உயிர் எடை" data-en="Total Live Weight">மொத்த உயிர் எடை</small>
+      <b id="goatTotalWeight">0.000 kg</b>
+    </div>
     <div class="total-box">
       <small data-ta="மொத்த கொள்முதல் தொகை" data-en="Purchase Total">மொத்த கொள்முதல் தொகை</small>
       <b id="goatTotal">₹0.00</b>
     </div>
+
     <button class="btn" type="button" onclick="calculateGoatPurchase()" data-ta="தொகை கணக்கிடு" data-en="Calculate Total">தொகை கணக்கிடு</button>
   </div>
+
   <div class="panel">
     <h3 data-ta="கொள்முதல் பதிவுகள்" data-en="Purchase Records">கொள்முதல் பதிவுகள்</h3>
     <div class="empty">No records available</div>
@@ -573,6 +353,7 @@ footer{
     </div>
     <button class="btn" type="button" onclick="calculateMeatPurchase()" data-ta="தொகை கணக்கிடு" data-en="Calculate Total">தொகை கணக்கிடு</button>
   </div>
+
   <div class="panel">
     <h3 data-ta="இறைச்சி கொள்முதல் பதிவுகள்" data-en="Meat Purchase Records">இறைச்சி கொள்முதல் பதிவுகள்</h3>
     <div class="empty">No records available</div>
@@ -614,6 +395,7 @@ footer{
     </div>
     <button class="btn" type="button" data-ta="பதிவு செய்ய" data-en="Save Record">பதிவு செய்ய</button>
   </div>
+
   <div class="panel">
     <h3 data-ta="வெட்டுதல் பதிவுகள்" data-en="Slaughter Records">வெட்டுதல் பதிவுகள்</h3>
     <div class="empty">No records available</div>
@@ -667,12 +449,7 @@ footer{
     <div class="table-wrap">
       <table>
         <thead>
-          <tr>
-            <th>Product</th>
-            <th>Source</th>
-            <th>Weight</th>
-            <th>Rate / kg</th>
-          </tr>
+          <tr><th>Product</th><th>Source</th><th>Weight</th><th>Rate / kg</th></tr>
         </thead>
         <tbody>
           <tr><td colspan="4" class="empty">No stock available</td></tr>
@@ -727,6 +504,7 @@ footer{
         </select>
       </div>
     </div>
+
     <div class="total-box">
       <small data-ta="மொத்த பில் தொகை" data-en="Bill Total">மொத்த பில் தொகை</small>
       <b id="billTotal">₹0.00</b>
@@ -780,7 +558,6 @@ footer{
 
 </main>
 
-<!-- NAVIGATION -->
 <nav class="bottom-nav">
   <button class="nav-btn active" onclick="showPage('dashboard',this)">
     <span>🏠</span><span data-ta="முகப்பு" data-en="Home">முகப்பு</span>
@@ -805,7 +582,6 @@ footer{
   </button>
 </nav>
 
-<!-- LOAD EXTERNAL JAVASCRIPT -->
 <script src="api.js"></script>
 <script src="app.js"></script>
 
