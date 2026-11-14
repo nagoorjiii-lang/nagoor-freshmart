@@ -1,0 +1,9 @@
+
+name = "nagoor-freshmart"
+main = "worker.js"
+compatibility_date = "2026-11-14"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "nagoor-freshmart-db"
+database_id = "11420614-58b9-4998-8c7b-f7686bae3b1a"
