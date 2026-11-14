@@ -1,6 +1,5 @@
-
 const NagoorAPI = {
-  BASE_URL: "",
+  BASE_URL: "https://nagoor-freshmart.nagoorjiii.workers.dev",
 
   setBaseUrl(url) {
     this.BASE_URL = String(url || "").trim().replace(/\/+$/, "");
