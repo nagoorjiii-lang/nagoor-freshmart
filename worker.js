@@ -1,13 +1,12 @@
-
 /* =========================================
    NAGOOR FRESHMART
    Cloudflare Worker API
    NEXORA Technologies
-   Version: 2.0.0
+   Version: 2.1.0
 ========================================= */
 
 const APP_NAME = "NAGOOR FRESHMART";
-const VERSION = "2.0.0";
+const VERSION = "2.1.0";
 
 /* =========================================
    COMMON HELPERS
@@ -15,6 +14,7 @@ const VERSION = "2.0.0";
 
 function cors(request, env) {
   const origin = request.headers.get("Origin");
+
   const allowed = (env.ALLOWED_ORIGINS || "")
     .split(",")
     .map(item => item.trim())
@@ -32,6 +32,17 @@ function cors(request, env) {
   }
 
   return headers;
+}
+
+function withCors(response, headers) {
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: {
+      ...Object.fromEntries(response.headers),
+      ...headers
+    }
+  });
 }
 
 function json(data, status = 200, headers = {}) {
@@ -377,13 +388,36 @@ async function createCustomer(db, data) {
 
 /* =========================================
    INVENTORY
+   Includes zero-stock active products
 ========================================= */
 
 async function inventory(db) {
   const result = await db.prepare(`
-    SELECT *
-    FROM inventory_balance
-    ORDER BY product_name
+    SELECT
+      p.id AS product_id,
+      p.product_name,
+      p.product_code,
+      p.category,
+      p.unit,
+      p.selling_price_paise,
+      COALESCE(ib.stock_quantity_grams, 0) AS stock_quantity_grams,
+
+      (
+        SELECT sm.notes
+        FROM stock_movements sm
+        WHERE sm.product_id = p.id
+        ORDER BY sm.id DESC
+        LIMIT 1
+      ) AS stock_source
+
+    FROM products p
+
+    LEFT JOIN inventory_balance ib
+      ON ib.product_id = p.id
+
+    WHERE p.is_active = 1
+
+    ORDER BY p.product_name
   `).all();
 
   return json({
@@ -391,6 +425,11 @@ async function inventory(db) {
     data: result.results
   });
 }
+
+/* =========================================
+   ADD STOCK
+   Saves product, source, weight and rate
+========================================= */
 
 async function addStock(db, data) {
   if (!validText(data.product_name)) {
@@ -404,29 +443,55 @@ async function addStock(db, data) {
   }
 
   const grams = toGrams(data.weight_kg);
+  const rate = number(data.selling_rate);
 
   if (grams <= 0) {
     return error("Valid stock weight required");
   }
 
-  const result = await db.prepare(`
-    INSERT INTO stock_movements (
-      product_id,
-      movement_type,
-      quantity_grams,
-      reference_type,
+  if (rate <= 0) {
+    return error("Valid selling rate required");
+  }
+
+  const source = validText(data.source)
+    ? data.source.trim()
+    : "Manual";
+
+  const notes = `Source: ${source}`;
+
+  const result = await db.batch([
+    db.prepare(`
+      UPDATE products
+      SET selling_price_paise = ?,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).bind(
+      toPaise(rate),
+      product.id
+    ),
+
+    db.prepare(`
+      INSERT INTO stock_movements (
+        product_id,
+        movement_type,
+        quantity_grams,
+        reference_type,
+        notes
+      ) VALUES (?, 'IN', ?, 'MANUAL', ?)
+    `).bind(
+      product.id,
+      grams,
       notes
-    ) VALUES (?, 'IN', ?, 'MANUAL', ?)
-  `).bind(
-    product.id,
-    grams,
-    data.notes || null
-  ).run();
+    )
+  ]);
 
   return json({
     success: true,
-    message: "Stock added",
-    movementId: result.meta.last_row_id
+    message: "Stock added successfully",
+    product: product.product_name,
+    source,
+    weightGrams: grams,
+    sellingRate: rate
   }, 201);
 }
 
@@ -499,7 +564,9 @@ async function createGoatPurchase(db, data) {
       return error("Every goat must have a valid weight");
     }
   } else {
-    const totalWeight = toGrams(data.total_weight_kg ?? data.weight_kg);
+    const totalWeight = toGrams(
+      data.total_weight_kg ?? data.weight_kg
+    );
 
     if (totalWeight <= 0) {
       return error("Valid total goat weight required");
@@ -515,11 +582,13 @@ async function createGoatPurchase(db, data) {
     }
   }
 
-  const totalWeightGrams = weights.reduce((sum, weight) => sum + weight, 0);
+  const totalWeightGrams = weights.reduce(
+    (sum, weight) => sum + weight,
+    0
+  );
 
   const baseCost = (totalWeightGrams / 1000) * rate;
   const totalAmount = toPaise(baseCost + otherCost);
-
   const paidPaise = toPaise(paidAmount);
 
   if (paidPaise > totalAmount) {
@@ -631,7 +700,12 @@ async function createMeatPurchase(db, data) {
   const otherCost = number(data.other_cost);
   const paidAmount = number(data.paid_amount);
 
-  if (weight <= 0 || rate <= 0 || otherCost < 0 || paidAmount < 0) {
+  if (
+    weight <= 0 ||
+    rate <= 0 ||
+    otherCost < 0 ||
+    paidAmount < 0
+  ) {
     return error("Valid weight, rate and cost required");
   }
 
@@ -643,7 +717,10 @@ async function createMeatPurchase(db, data) {
 
   const supplierId = await getSupplier(db, data.supplier_name);
 
-  const total = toPaise((weight / 1000) * rate + otherCost);
+  const total = toPaise(
+    (weight / 1000) * rate + otherCost
+  );
+
   const paid = toPaise(paidAmount);
 
   if (paid > total) {
@@ -783,7 +860,9 @@ async function createSale(db, data) {
 
   let paid = total;
 
-  if (String(data.payment_method || "").toUpperCase() === "CREDIT") {
+  if (
+    String(data.payment_method || "").toUpperCase() === "CREDIT"
+  ) {
     paid = 0;
   } else if (data.paid_amount !== undefined) {
     paid = toPaise(data.paid_amount);
@@ -793,7 +872,8 @@ async function createSale(db, data) {
     return error("Invalid paid amount");
   }
 
-  const invoice = `NFS-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+  const invoice =
+    `NFS-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
 
   const sale = await db.prepare(`
     INSERT INTO sales (
@@ -898,7 +978,9 @@ async function createSlaughter(db, data) {
   const slaughterCost = toPaise(data.slaughter_cost || 0);
 
   if (!lotId || carcass <= 0 || !slaughterDate) {
-    return error("Valid goat lot, date and carcass weight required");
+    return error(
+      "Valid goat lot, date and carcass weight required"
+    );
   }
 
   if (slaughterCost < 0) {
@@ -923,7 +1005,9 @@ async function createSlaughter(db, data) {
     return error("Carcass weight cannot exceed live weight");
   }
 
-  const outputs = Array.isArray(data.outputs) ? data.outputs : [];
+  const outputs = Array.isArray(data.outputs)
+    ? data.outputs
+    : [];
 
   if (outputs.length > 30) {
     return error("Too many output items");
@@ -936,7 +1020,9 @@ async function createSlaughter(db, data) {
     const grams = toGrams(item.weight_kg);
 
     if (!product || grams <= 0) {
-      return error("Every slaughter output needs a valid product and weight");
+      return error(
+        "Every slaughter output needs a valid product and weight"
+      );
     }
 
     preparedOutputs.push({
@@ -952,7 +1038,9 @@ async function createSlaughter(db, data) {
   );
 
   if (totalOutput > 0 && outputSum > totalOutput) {
-    return error("Output item weights exceed total output weight");
+    return error(
+      "Output item weights exceed total output weight"
+    );
   }
 
   const batch = await db.prepare(`
@@ -984,7 +1072,10 @@ async function createSlaughter(db, data) {
           slaughter_date = ?
       WHERE id = ?
         AND slaughter_status != 'COMPLETED'
-    `).bind(slaughterDate, lotId)
+    `).bind(
+      slaughterDate,
+      lotId
+    )
   ];
 
   for (const item of preparedOutputs) {
@@ -1034,7 +1125,10 @@ async function createSlaughter(db, data) {
 
 async function collectPayment(db, data) {
   const type = String(data.payment_type || "").toUpperCase();
-  const referenceType = String(data.reference_type || "").toUpperCase();
+  const referenceType = String(
+    data.reference_type || ""
+  ).toUpperCase();
+
   const referenceId = Math.floor(number(data.reference_id));
   const paid = toPaise(data.amount);
   const paymentDate = validDate(data.payment_date);
@@ -1065,7 +1159,9 @@ async function collectPayment(db, data) {
   const reference = allowed[referenceType];
 
   if (!reference || reference.direction !== type) {
-    return error("Unsupported payment reference or payment direction");
+    return error(
+      "Unsupported payment reference or payment direction"
+    );
   }
 
   const record = await db.prepare(`
@@ -1078,7 +1174,8 @@ async function collectPayment(db, data) {
     return error("Payment reference not found", 404);
   }
 
-  const balance = number(record.total_amount_paise) -
+  const balance =
+    number(record.total_amount_paise) -
     number(record.paid_amount_paise);
 
   if (paid > balance) {
@@ -1086,7 +1183,11 @@ async function collectPayment(db, data) {
   }
 
   const newPaid = number(record.paid_amount_paise) + paid;
-  const status = paymentStatus(newPaid, number(record.total_amount_paise));
+
+  const status = paymentStatus(
+    newPaid,
+    number(record.total_amount_paise)
+  );
 
   await db.batch([
     db.prepare(`
@@ -1095,7 +1196,11 @@ async function collectPayment(db, data) {
           payment_status = ?,
           updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
-    `).bind(newPaid, status, referenceId),
+    `).bind(
+      newPaid,
+      status,
+      referenceId
+    ),
 
     db.prepare(`
       INSERT INTO payments (
@@ -1187,9 +1292,13 @@ async function reports(db) {
   const purchases = await db.prepare(`
     SELECT COALESCE(SUM(total), 0) AS total
     FROM (
-      SELECT total_amount_paise AS total FROM goat_purchases
+      SELECT total_amount_paise AS total
+      FROM goat_purchases
+
       UNION ALL
-      SELECT total_amount_paise AS total FROM meat_purchases
+
+      SELECT total_amount_paise AS total
+      FROM meat_purchases
     )
   `).first();
 
@@ -1220,6 +1329,7 @@ async function reports(db) {
 
 /* =========================================
    MAIN ROUTER
+   CORS applied to every response
 ========================================= */
 
 export default {
@@ -1233,201 +1343,154 @@ export default {
       });
     }
 
-    if (!env.DB) {
-      return error("D1 database binding DB is missing", 500, headers);
-    }
-
-    const url = new URL(request.url);
-    const path = url.pathname.replace(/\/+$/, "") || "/";
-    const method = request.method;
+    let response;
 
     try {
-      if (method === "GET" && path === "/") {
-        return json({
-          success: true,
-          application: APP_NAME,
-          version: VERSION,
-          message: "API is online"
-        }, 200, headers);
-      }
-
-      if (method === "GET" && path === "/health") {
-        return await health(env.DB).then(response =>
-          new Response(response.body, {
-            status: response.status,
-            headers: { ...Object.fromEntries(response.headers), ...headers }
-          })
+      if (!env.DB) {
+        response = error(
+          "D1 database binding DB is missing",
+          500
         );
+      } else {
+        const url = new URL(request.url);
+        const path = url.pathname.replace(/\/+$/, "") || "/";
+        const method = request.method;
+        const db = env.DB;
+
+        if (method === "GET" && path === "/") {
+          response = json({
+            success: true,
+            application: APP_NAME,
+            version: VERSION,
+            message: "API is online"
+          });
+        }
+
+        else if (method === "GET" && path === "/health") {
+          response = await health(db);
+        }
+
+        else if (method === "GET" && path === "/dashboard") {
+          response = await dashboard(db);
+        }
+
+        else if (method === "GET" && path === "/products") {
+          response = await listProducts(db);
+        }
+
+        else if (method === "POST" && path === "/products") {
+          const data = await readBody(request);
+
+          response = data
+            ? await createProduct(db, data)
+            : error("Invalid JSON body");
+        }
+
+        else if (method === "GET" && path === "/suppliers") {
+          response = await listSuppliers(db);
+        }
+
+        else if (method === "POST" && path === "/suppliers") {
+          const data = await readBody(request);
+
+          response = data
+            ? await createSupplier(db, data)
+            : error("Invalid JSON body");
+        }
+
+        else if (method === "GET" && path === "/customers") {
+          response = await listCustomers(db);
+        }
+
+        else if (method === "POST" && path === "/customers") {
+          const data = await readBody(request);
+
+          response = data
+            ? await createCustomer(db, data)
+            : error("Invalid JSON body");
+        }
+
+        else if (method === "GET" && path === "/inventory") {
+          response = await inventory(db);
+        }
+
+        else if (method === "POST" && path === "/inventory") {
+          const data = await readBody(request);
+
+          response = data
+            ? await addStock(db, data)
+            : error("Invalid JSON body");
+        }
+
+        else if (method === "GET" && path === "/goat-lots") {
+          response = await listGoatLots(db);
+        }
+
+        else if (method === "POST" && path === "/goat-purchases") {
+          const data = await readBody(request);
+
+          response = data
+            ? await createGoatPurchase(db, data)
+            : error("Invalid JSON body");
+        }
+
+        else if (method === "POST" && path === "/meat-purchases") {
+          const data = await readBody(request);
+
+          response = data
+            ? await createMeatPurchase(db, data)
+            : error("Invalid JSON body");
+        }
+
+        else if (method === "POST" && path === "/slaughter") {
+          const data = await readBody(request);
+
+          response = data
+            ? await createSlaughter(db, data)
+            : error("Invalid JSON body");
+        }
+
+        else if (method === "POST" && path === "/sales") {
+          const data = await readBody(request);
+
+          response = data
+            ? await createSale(db, data)
+            : error("Invalid JSON body");
+        }
+
+        else if (method === "POST" && path === "/payments") {
+          const data = await readBody(request);
+
+          response = data
+            ? await collectPayment(db, data)
+            : error("Invalid JSON body");
+        }
+
+        else if (method === "POST" && path === "/expenses") {
+          const data = await readBody(request);
+
+          response = data
+            ? await createExpense(db, data)
+            : error("Invalid JSON body");
+        }
+
+        else if (method === "GET" && path === "/reports") {
+          response = await reports(db);
+        }
+
+        else {
+          response = error("API endpoint not found", 404);
+        }
       }
-
-      if (method === "GET" && path === "/dashboard") {
-        return await dashboard(env.DB).then(response =>
-          new Response(response.body, {
-            status: response.status,
-            headers: { ...Object.fromEntries(response.headers), ...headers }
-          })
-        );
-      }
-
-      if (method === "GET" && path === "/products") {
-        return await listProducts(env.DB).then(response =>
-          new Response(response.body, {
-            status: response.status,
-            headers: { ...Object.fromEntries(response.headers), ...headers }
-          })
-        );
-      }
-
-      if (method === "POST" && path === "/products") {
-        const data = await readBody(request);
-        if (!data) return error("Invalid JSON body", 400, headers);
-        const response = await createProduct(env.DB, data);
-        return new Response(response.body, {
-          status: response.status,
-          headers: { ...Object.fromEntries(response.headers), ...headers }
-        });
-      }
-
-      if (method === "GET" && path === "/suppliers") {
-        const response = await listSuppliers(env.DB);
-        return new Response(response.body, {
-          status: response.status,
-          headers: { ...Object.fromEntries(response.headers), ...headers }
-        });
-      }
-
-      if (method === "POST" && path === "/suppliers") {
-        const data = await readBody(request);
-        if (!data) return error("Invalid JSON body", 400, headers);
-        const response = await createSupplier(env.DB, data);
-        return new Response(response.body, {
-          status: response.status,
-          headers: { ...Object.fromEntries(response.headers), ...headers }
-        });
-      }
-
-      if (method === "GET" && path === "/customers") {
-        const response = await listCustomers(env.DB);
-        return new Response(response.body, {
-          status: response.status,
-          headers: { ...Object.fromEntries(response.headers), ...headers }
-        });
-      }
-
-      if (method === "POST" && path === "/customers") {
-        const data = await readBody(request);
-        if (!data) return error("Invalid JSON body", 400, headers);
-        const response = await createCustomer(env.DB, data);
-        return new Response(response.body, {
-          status: response.status,
-          headers: { ...Object.fromEntries(response.headers), ...headers }
-        });
-      }
-
-      if (method === "GET" && path === "/inventory") {
-        const response = await inventory(env.DB);
-        return new Response(response.body, {
-          status: response.status,
-          headers: { ...Object.fromEntries(response.headers), ...headers }
-        });
-      }
-
-      if (method === "POST" && path === "/inventory") {
-        const data = await readBody(request);
-        if (!data) return error("Invalid JSON body", 400, headers);
-        const response = await addStock(env.DB, data);
-        return new Response(response.body, {
-          status: response.status,
-          headers: { ...Object.fromEntries(response.headers), ...headers }
-        });
-      }
-
-      if (method === "GET" && path === "/goat-lots") {
-        const response = await listGoatLots(env.DB);
-        return new Response(response.body, {
-          status: response.status,
-          headers: { ...Object.fromEntries(response.headers), ...headers }
-        });
-      }
-
-      if (method === "POST" && path === "/goat-purchases") {
-        const data = await readBody(request);
-        if (!data) return error("Invalid JSON body", 400, headers);
-        const response = await createGoatPurchase(env.DB, data);
-        return new Response(response.body, {
-          status: response.status,
-          headers: { ...Object.fromEntries(response.headers), ...headers }
-        });
-      }
-
-      if (method === "POST" && path === "/meat-purchases") {
-        const data = await readBody(request);
-        if (!data) return error("Invalid JSON body", 400, headers);
-        const response = await createMeatPurchase(env.DB, data);
-        return new Response(response.body, {
-          status: response.status,
-          headers: { ...Object.fromEntries(response.headers), ...headers }
-        });
-      }
-
-      if (method === "POST" && path === "/slaughter") {
-        const data = await readBody(request);
-        if (!data) return error("Invalid JSON body", 400, headers);
-        const response = await createSlaughter(env.DB, data);
-        return new Response(response.body, {
-          status: response.status,
-          headers: { ...Object.fromEntries(response.headers), ...headers }
-        });
-      }
-
-      if (method === "POST" && path === "/sales") {
-        const data = await readBody(request);
-        if (!data) return error("Invalid JSON body", 400, headers);
-        const response = await createSale(env.DB, data);
-        return new Response(response.body, {
-          status: response.status,
-          headers: { ...Object.fromEntries(response.headers), ...headers }
-        });
-      }
-
-      if (method === "POST" && path === "/payments") {
-        const data = await readBody(request);
-        if (!data) return error("Invalid JSON body", 400, headers);
-        const response = await collectPayment(env.DB, data);
-        return new Response(response.body, {
-          status: response.status,
-          headers: { ...Object.fromEntries(response.headers), ...headers }
-        });
-      }
-
-      if (method === "POST" && path === "/expenses") {
-        const data = await readBody(request);
-        if (!data) return error("Invalid JSON body", 400, headers);
-        const response = await createExpense(env.DB, data);
-        return new Response(response.body, {
-          status: response.status,
-          headers: { ...Object.fromEntries(response.headers), ...headers }
-        });
-      }
-
-      if (method === "GET" && path === "/reports") {
-        const response = await reports(env.DB);
-        return new Response(response.body, {
-          status: response.status,
-          headers: { ...Object.fromEntries(response.headers), ...headers }
-        });
-      }
-
-      return error("API endpoint not found", 404, headers);
-
     } catch (err) {
       console.error("Nagoor Freshmart API error:", err);
 
-      return error(
+      response = error(
         "Internal server error. Check Worker logs.",
-        500,
-        headers
+        500
       );
     }
+
+    return withCors(response, headers);
   }
 };
