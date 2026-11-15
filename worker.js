@@ -1,12 +1,13 @@
+
 /* =========================================
    NAGOOR FRESHMART
    Cloudflare Worker API
    NEXORA Technologies
-   Version: 2.1.0
+   Version: 2.2.0
 ========================================= */
 
 const APP_NAME = "NAGOOR FRESHMART";
-const VERSION = "2.1.0";
+const VERSION = "2.2.0";
 
 /* =========================================
    COMMON HELPERS
@@ -459,7 +460,7 @@ async function addStock(db, data) {
 
   const notes = `Source: ${source}`;
 
-  const result = await db.batch([
+  await db.batch([
     db.prepare(`
       UPDATE products
       SET selling_price_paise = ?,
@@ -815,65 +816,246 @@ async function createMeatPurchase(db, data) {
 }
 
 /* =========================================
-   SALES / BILLING
+   SALES / MULTI-ITEM BILLING
+   Supports old single-item and new cart requests
 ========================================= */
 
 async function createSale(db, data) {
-  if (!validText(data.product_name)) {
-    return error("Select a product");
-  }
-
   const saleDate = validDate(data.sale_date);
 
   if (!saleDate) {
     return error("Invalid sale date");
   }
 
-  const weight = toGrams(data.weight_kg);
-  const rate = number(data.rate_per_kg);
-  const discount = toPaise(data.discount || 0);
+  /*
+    Backward compatibility:
+    Old request:
+    {
+      product_name,
+      weight_kg,
+      rate_per_kg
+    }
 
-  if (weight <= 0 || rate <= 0 || discount < 0) {
-    return error("Valid weight and rate required");
+    New request:
+    {
+      items: [
+        {
+          product_name,
+          weight_kg,
+          rate_per_kg
+        }
+      ]
+    }
+  */
+
+  let inputItems = [];
+
+  if (Array.isArray(data.items)) {
+    inputItems = data.items;
+  } else if (validText(data.product_name)) {
+    inputItems = [{
+      product_name: data.product_name,
+      weight_kg: data.weight_kg,
+      rate_per_kg: data.rate_per_kg
+    }];
   }
 
-  const product = await getProduct(db, data.product_name);
-
-  if (!product) {
-    return error("Product not found", 404);
+  if (inputItems.length === 0) {
+    return error("Add at least one product to the bill");
   }
 
-  const stock = await db.prepare(`
-    SELECT stock_quantity_grams
-    FROM inventory_balance
-    WHERE product_id = ?
-  `).bind(product.id).first();
-
-  if (!stock || number(stock.stock_quantity_grams) < weight) {
-    return error("Insufficient stock", 409);
+  if (inputItems.length > 100) {
+    return error("A bill cannot contain more than 100 items");
   }
 
-  const customerId = await getCustomer(db, data.customer_name);
+  const preparedItems = [];
 
-  const subtotal = toPaise((weight / 1000) * rate);
-  const total = Math.max(0, subtotal - discount);
+  /*
+    Validate each cart line separately.
+    Repeated products remain separate bill lines.
+  */
 
-  let paid = total;
+  for (let index = 0; index < inputItems.length; index++) {
+    const item = inputItems[index];
 
-  if (
-    String(data.payment_method || "").toUpperCase() === "CREDIT"
-  ) {
-    paid = 0;
+    if (!validText(item.product_name)) {
+      return error(`Product name missing in item ${index + 1}`);
+    }
+
+    const product = await getProduct(db, item.product_name);
+
+    if (!product) {
+      return error(
+        `Product not found: ${item.product_name}`,
+        404
+      );
+    }
+
+    const weightGrams = toGrams(item.weight_kg);
+    const rate = number(item.rate_per_kg);
+
+    if (weightGrams <= 0) {
+      return error(
+        `Invalid weight for ${product.product_name}`
+      );
+    }
+
+    if (rate <= 0) {
+      return error(
+        `Invalid rate for ${product.product_name}`
+      );
+    }
+
+    const lineTotalPaise = toPaise(
+      (weightGrams / 1000) * rate
+    );
+
+    if (lineTotalPaise <= 0) {
+      return error(
+        `Invalid amount for ${product.product_name}`
+      );
+    }
+
+    preparedItems.push({
+      productId: product.id,
+      productName: product.product_name,
+      weightGrams,
+      rate,
+      lineTotalPaise
+    });
+  }
+
+  /*
+    Aggregate required stock by product.
+    This prevents repeated cart lines from bypassing
+    the stock validation.
+  */
+
+  const requiredStock = new Map();
+
+  for (const item of preparedItems) {
+    const current = requiredStock.get(item.productId) || {
+      productName: item.productName,
+      weightGrams: 0
+    };
+
+    current.weightGrams += item.weightGrams;
+
+    requiredStock.set(item.productId, current);
+  }
+
+  /*
+    Validate available stock for every product
+    before creating the sale.
+  */
+
+  for (const [productId, required] of requiredStock) {
+    const stock = await db.prepare(`
+      SELECT stock_quantity_grams
+      FROM inventory_balance
+      WHERE product_id = ?
+    `).bind(productId).first();
+
+    const availableGrams = number(
+      stock?.stock_quantity_grams
+    );
+
+    if (availableGrams < required.weightGrams) {
+      return error(
+        `Insufficient stock for ${required.productName}. ` +
+        `Available: ${(availableGrams / 1000).toFixed(3)} kg, ` +
+        `Required: ${(required.weightGrams / 1000).toFixed(3)} kg`,
+        409
+      );
+    }
+  }
+
+  /*
+    Calculate bill subtotal and discount.
+    Discount is entered in rupees.
+  */
+
+  const subtotalPaise = preparedItems.reduce(
+    (sum, item) => sum + item.lineTotalPaise,
+    0
+  );
+
+  const discountPaise = toPaise(data.discount || 0);
+
+  if (discountPaise < 0 || discountPaise > subtotalPaise) {
+    return error("Invalid discount amount");
+  }
+
+  const totalPaise = subtotalPaise - discountPaise;
+
+  /*
+    Distribute discount proportionally between
+    item lines for accurate invoice details.
+  */
+
+  let remainingDiscount = discountPaise;
+
+  preparedItems.forEach((item, index) => {
+    let itemDiscount = 0;
+
+    if (subtotalPaise > 0) {
+      if (index === preparedItems.length - 1) {
+        itemDiscount = remainingDiscount;
+      } else {
+        itemDiscount = Math.floor(
+          discountPaise *
+          item.lineTotalPaise /
+          subtotalPaise
+        );
+      }
+    }
+
+    item.discountPaise = itemDiscount;
+    item.netTotalPaise =
+      item.lineTotalPaise - itemDiscount;
+
+    remainingDiscount -= itemDiscount;
+  });
+
+  /*
+    Payment handling:
+    CASH / UPI defaults to full payment.
+    CREDIT defaults to zero payment.
+    Partial payment is supported.
+  */
+
+  const paymentMethod = String(
+    data.payment_method || "CASH"
+  ).trim().toUpperCase();
+
+  let paidPaise = totalPaise;
+
+  if (paymentMethod === "CREDIT") {
+    paidPaise = 0;
   } else if (data.paid_amount !== undefined) {
-    paid = toPaise(data.paid_amount);
+    paidPaise = toPaise(data.paid_amount);
   }
 
-  if (paid < 0 || paid > total) {
+  if (paidPaise < 0 || paidPaise > totalPaise) {
     return error("Invalid paid amount");
   }
 
-  const invoice =
+  /*
+    Find or create customer.
+    Empty customer name is allowed for walk-in sales.
+  */
+
+  const customerId = await getCustomer(
+    db,
+    data.customer_name
+  );
+
+  const invoiceNumber =
     `NFS-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+
+  /*
+    Create one invoice for the complete cart.
+  */
 
   const sale = await db.prepare(`
     INSERT INTO sales (
@@ -888,80 +1070,119 @@ async function createSale(db, data) {
       notes
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).bind(
-    invoice,
+    invoiceNumber,
     customerId,
     saleDate,
-    subtotal,
-    discount,
-    total,
-    paid,
-    paymentStatus(paid, total),
+    subtotalPaise,
+    discountPaise,
+    totalPaise,
+    paidPaise,
+    paymentStatus(paidPaise, totalPaise),
     data.notes || null
   ).run();
 
   const saleId = sale.meta.last_row_id;
 
-  const statements = [
-    db.prepare(`
-      INSERT INTO sale_items (
-        sale_id,
-        product_id,
-        quantity_grams,
-        unit_price_paise,
-        total_amount_paise
-      ) VALUES (?, ?, ?, ?, ?)
-    `).bind(
-      saleId,
-      product.id,
-      weight,
-      toPaise(rate),
-      total
-    ),
+  /*
+    Save every sale item and stock movement.
+    All item statements and the payment are submitted
+    together in one D1 batch.
+  */
 
-    db.prepare(`
-      INSERT INTO stock_movements (
-        product_id,
-        movement_type,
-        quantity_grams,
-        reference_type,
-        reference_id,
-        notes
-      ) VALUES (?, 'OUT', ?, 'SALE', ?, ?)
-    `).bind(
-      product.id,
-      -weight,
-      saleId,
-      "Customer sale"
-    )
-  ];
+  const statements = [];
 
-  if (paid > 0) {
-    statements.push(db.prepare(`
-      INSERT INTO payments (
-        payment_type,
-        reference_type,
-        reference_id,
-        payment_date,
-        amount_paise,
-        payment_method
-      ) VALUES ('IN', 'SALE', ?, ?, ?, ?)
-    `).bind(
-      saleId,
-      saleDate,
-      paid,
-      data.payment_method || "CASH"
-    ));
+  for (const item of preparedItems) {
+    statements.push(
+      db.prepare(`
+        INSERT INTO sale_items (
+          sale_id,
+          product_id,
+          quantity_grams,
+          unit_price_paise,
+          total_amount_paise
+        ) VALUES (?, ?, ?, ?, ?)
+      `).bind(
+        saleId,
+        item.productId,
+        item.weightGrams,
+        toPaise(item.rate),
+        item.netTotalPaise
+      )
+    );
+
+    statements.push(
+      db.prepare(`
+        INSERT INTO stock_movements (
+          product_id,
+          movement_type,
+          quantity_grams,
+          reference_type,
+          reference_id,
+          notes
+        ) VALUES (?, 'OUT', ?, 'SALE', ?, ?)
+      `).bind(
+        item.productId,
+        -item.weightGrams,
+        saleId,
+        `Customer sale - ${invoiceNumber}`
+      )
+    );
+  }
+
+  /*
+    One payment record for the invoice.
+  */
+
+  if (paidPaise > 0) {
+    statements.push(
+      db.prepare(`
+        INSERT INTO payments (
+          payment_type,
+          reference_type,
+          reference_id,
+          payment_date,
+          amount_paise,
+          payment_method
+        ) VALUES ('IN', 'SALE', ?, ?, ?, ?)
+      `).bind(
+        saleId,
+        saleDate,
+        paidPaise,
+        paymentMethod
+      )
+    );
   }
 
   await db.batch(statements);
 
   return json({
     success: true,
-    message: "Bill created",
-    invoiceNumber: invoice,
+    message: "Bill created successfully",
+    invoiceNumber,
     saleId,
-    totalAmountPaise: total,
-    paidAmountPaise: paid
+    saleDate,
+    customerName: data.customer_name || "Walk-in Customer",
+
+    itemCount: preparedItems.length,
+
+    items: preparedItems.map(item => ({
+      productId: item.productId,
+      productName: item.productName,
+      weightGrams: item.weightGrams,
+      weightKg: item.weightGrams / 1000,
+      ratePerKg: item.rate,
+      amountPaise: item.lineTotalPaise,
+      discountPaise: item.discountPaise,
+      totalPaise: item.netTotalPaise
+    })),
+
+    subtotalPaise,
+    discountPaise,
+    totalAmountPaise: totalPaise,
+    paidAmountPaise: paidPaise,
+    balancePaise: totalPaise - paidPaise,
+    paymentMethod,
+    paymentStatus: paymentStatus(paidPaise, totalPaise)
   }, 201);
 }
 
