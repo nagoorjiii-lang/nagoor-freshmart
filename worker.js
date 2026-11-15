@@ -16,11 +16,6 @@ const VERSION = "2.2.0";
 function cors(request, env) {
   const origin = request.headers.get("Origin");
 
-  const allowed = (env.ALLOWED_ORIGINS || "")
-    .split(",")
-    .map(item => item.trim())
-    .filter(Boolean);
-
   const headers = {
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
@@ -28,7 +23,10 @@ function cors(request, env) {
     "Vary": "Origin"
   };
 
-  if (origin && allowed.includes(origin)) {
+  // Temporary fix - allow your pages.dev domain
+  if (origin === "https://nagoor-freshmart.pages.dev" || 
+      origin === "http://localhost:8787" ||
+      origin === "http://127.0.0.1:8787") {
     headers["Access-Control-Allow-Origin"] = origin;
   }
 
